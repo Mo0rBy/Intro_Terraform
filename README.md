@@ -176,7 +176,7 @@ resource "aws_instance" "app_instance" {
         type = "ssh"
         user = "ubuntu"
         private_key = var.aws_key_path
-        host = "${self.associate_public_ip_address}"
+        host = aws_instance.app_instance.public_ip
     }
 
     provisioner "remote-exec" {
@@ -365,3 +365,140 @@ output "route_table_id" {
 ```
 
 ![](./img/outputs_tf.PNG)
+
+---
+# Creating a Load Balancer and Auto Scaling group with CloudWatch metrics using Terraform
+
+An Auto Scaling group can be created using Terraform. To do this, a load balancer must also be created
+
+```
+########//Load Balancing + Auto Scaling\\########
+
+# Create a launch template
+
+# resource "aws_launch_template" "app_template" {
+#     name = "sre_will_app_launch_template"
+#     image_id = var.app_ami_id
+#     instance_type ="t2.micro"
+#     vpc_security_group_ids = [
+#         aws_security_group.sre_will_app_group.id
+#     ]
+
+#     key_name = var.aws_key_name
+# }
+
+# Create a lunch configuration
+
+resource "aws_launch_configuration" "app_launch_configuration" {
+    name = "sre_will_app_launch_configuration"
+    image_id = var.app_ami_id
+    instance_type = "t2.micro"
+}
+
+# Create an application load balancer
+
+resource "aws_lb" "sre_will_LB_tf" {
+    name = "sre-will-LB-tf"
+    internal = false
+    load_balancer_type = "application"
+    subnets = [
+        aws_subnet.sre_will_public_subnet_tf.id,
+        aws_subnet.sre_will_private_subnet_tf.id
+    ]
+    # security_groups = # What SG do you use??
+
+    tags = {
+        Name = "sre_will_loadbalancer_tf"
+    }
+}
+
+# Create an instance target group
+
+resource "aws_lb_target_group" "sre_will_app_TG_tf" {
+    name = "sre-will-app-TG-tf"
+    port = 80
+    protocol = "HTTP"
+    vpc_id = aws_vpc.sre_will_vpc_tf.id
+    # target_type = instance (by default)
+
+    tags = {
+        Name = "sre_will_targetgroup_tf"
+    }
+}
+
+# Create a listener
+
+resource "aws_lb_listener" "sre_will_listener" {
+    load_balancer_arn = aws_lb.sre_will_LB_tf.arn
+    port = 80
+    protocol = "HTTP"
+
+    default_action {
+        type = "forward"
+        target_group_arn = aws_lb_target_group.sre_will_app_TG_tf.arn
+    }
+}
+
+resource "aws_lb_target_group_attachment" "sre_will_app_TG_attachment" {
+    target_group_arn = aws_lb_target_group.sre_will_app_TG_tf.arn
+    target_id = aws_instance.app_instance.id
+    port = 80
+}
+
+# Create an Auto Scaling group (from launch template)
+
+# resource "aws_autoscaling_group" "sre_will_ASG_tf" {
+#     name = "sre_will_app_ASG_tf"
+
+#     min_size = 1
+#     desired_capacity = 1
+#     max_size = 3
+
+#     availability_zones = [
+#         "euw1-az1",
+#         "euw1-az2"
+#     ]
+
+#     launch_template {
+#         id = aws_launch_template.app_template.id
+#         version = "$Latest"
+#     }
+# }
+
+# Create an Auto Scaling group (from launch configuration)
+
+resource "aws_autoscaling_group" "sre_will_ASG_tf" {
+    name = "sre_will_ASF_tf"
+
+    min_size = 1
+    desired_capacity = 1
+    max_size = 3
+
+    vpc_zone_identifier = [
+        aws_subnet.sre_will_public_subnet_tf.id,
+        aws_subnet.sre_will_private_subnet_tf.id
+    ]
+
+    launch_configuration = aws_launch_configuration.app_launch_configuration.name
+}
+
+resource "aws_autoscaling_policy" "app_ASG_policy" {
+    name = "sre_will_app_ASG_policy"
+    policy_type = "TargetTrackingScaling"
+    estimated_instance_warmup = 100
+    # Use "cooldown" or "estimated_instance_warmup"
+    # Error: cooldown is only used by "SimpleScaling"
+    autoscaling_group_name = aws_autoscaling_group.sre_will_ASG_tf.name
+
+    target_tracking_configuration {
+        predefined_metric_specification {
+            predefined_metric_type = "ASGAverageCPUUtilization"
+            # Need to make sure to use valid options here
+            # Think the syntax is
+            ## ASG for auto scaling group metrics, ALB for load balancing metrics
+            ## Name of metric with no spaces
+        }
+        target_value = 50.0
+    }
+}
+```

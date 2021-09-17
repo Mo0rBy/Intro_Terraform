@@ -23,3 +23,7 @@
 output "app_instance_SSH_command" {
     value = "ssh -i ${var.aws_key_path} ubuntu@${aws_instance.app_instance.public_ip}"
 }
+
+output "DB_HOST_variable_replace_command" {
+    value = "sed '/DB_HOST/c DB_HOST=mongodb://${aws_instance.db_instance.private_ip}:27017/posts'"
+}
