@@ -236,16 +236,16 @@ resource "aws_instance" "db_instance" {
 
 # Create a launch template
 
-# resource "aws_launch_template" "app_template" {
-#     name = "sre_will_app_launch_template"
-#     image_id = var.app_ami_id
-#     instance_type ="t2.micro"
-#     vpc_security_group_ids = [
-#         aws_security_group.sre_will_app_group.id
-#     ]
+resource "aws_launch_template" "app_template" {
+    name = "sre_will_app_launch_template"
+    image_id = var.app_ami_id
+    instance_type ="t2.micro"
+    vpc_security_group_ids = [
+        aws_security_group.sre_will_app_group.id
+    ]
 
-#     key_name = var.aws_key_name
-# }
+    key_name = var.aws_key_name
+}
 
 # Create a lunch configuration
 
@@ -315,8 +315,8 @@ resource "aws_lb_target_group_attachment" "sre_will_app_TG_attachment" {
 #     max_size = 3
 
 #     availability_zones = [
-#         "euw1-az1",
-#         "euw1-az2"
+#         aws_subnet.sre_will_public_subnet_tf.availability_zone_id,
+#         aws_subnet.sre_will_private_subnet_tf.availability_zone_id
 #     ]
 
 #     launch_template {

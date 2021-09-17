@@ -369,7 +369,19 @@ output "route_table_id" {
 ---
 # Creating a Load Balancer and Auto Scaling group with CloudWatch metrics using Terraform
 
-An Auto Scaling group can be created using Terraform. To do this, a load balancer must also be created
+An Auto Scaling group can be created using Terraform. To do this, we must create:
+1. A `launch template` or `launch configuration`
+2. An `applciation load balancer`
+3. A `target group`
+4. A `listener`
+5. A `target group attachment` 
+    - This final object isn't required when manually creating an Auto Scaling group on the AWS console. I think selecting the target group is attaching it at the same time)
+
+Creating the Auto Scaling group with a `launch configuration` is much easier than using as `launch template`. A large number of people online report that using a `launch template` is fiddly and cumbersome. The main error that I kept getting was that the `launch_template` was not fully configured, specifically the `availability zones` that were assigned to the `launch_template`.
+
+This is the error:
+
+![](./img/aws_ASG_using_launch_template_error.PNG)
 
 ```
 ########//Load Balancing + Auto Scaling\\########
