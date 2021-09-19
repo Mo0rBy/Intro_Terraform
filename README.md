@@ -46,7 +46,6 @@ resource "aws_instance" "app_instance" {
     }
 }
 ```
-</details>
 
 ---
 ### Full `main.tf` script using `variable.tf`
@@ -192,6 +191,7 @@ resource "aws_instance" "app_instance" {
     }
 }
 ```
+</details>
 
 ---
 ### Using output values as inputs in `main.tf`
