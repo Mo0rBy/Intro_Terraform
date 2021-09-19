@@ -63,7 +63,7 @@ variable "vpc_id" {
 *`variable "vpc_id" {` is a variable with the name `vpc_id`, therefore, reference it in `main.tf` with `var.vpc_id`*
 
 <details>
-    <summary>Main.tf using variable.tf for soft-coding</summary>
+    <summary>Main.tf script using variable.tf for soft-coding >> (Click to expand)</summary>
 
 ```
 ## Let's set up our cloud provider with Terraform
@@ -197,6 +197,9 @@ resource "aws_instance" "app_instance" {
 ### Using output values as inputs in `main.tf`
 In the previous section, `main.tf` needs to be run multiple times. Each time the script is run, we need to go to AWS and get the ID of what was just created, and put that into the `variable.tf`. This is because a new ID is assigned to the object that each time it is created. We can change `main.tf` such that it extracts the ID from the object that is created and then uses it in the next section. The script for this is:
 
+<details>
+    <summary>Main.tf script using outputs as inputs for soft-coding >> (Click to expand)</summary>
+
 ```
 # Let's set up our cloud provider with Terraform
 
@@ -324,6 +327,8 @@ resource "aws_instance" "app_instance" {
     # }
 }
 ```
+</details>
+
 The method for referencing attributes of objects that are newly created is as follows:
 
 ```
@@ -387,6 +392,9 @@ Creating the Auto Scaling group with a `launch configuration` is much easier tha
 This is the error:
 
 ![](./img/aws_ASG_using_launch_template_error.PNG)
+
+<details>
+    <summary>Main.tf script for creating an application Load-Balancer and an Auto Scaling group >> (Click to expand)</summary>
 
 ```
 ########//Load Balancing + Auto Scaling\\########
@@ -519,3 +527,4 @@ resource "aws_autoscaling_policy" "app_ASG_policy" {
     }
 }
 ```
+</details>
