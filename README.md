@@ -46,6 +46,7 @@ resource "aws_instance" "app_instance" {
     }
 }
 ```
+</details>
 
 ---
 ### Full `main.tf` script using `variable.tf`
@@ -60,7 +61,10 @@ variable "vpc_id" {
 }
 ```
 
-*`variable "vpc_id" {` is a variable with the name `vpc_id`, thereofore, reference it in `main.tf` with `var.vpc_id`*
+*`variable "vpc_id" {` is a variable with the name `vpc_id`, therefore, reference it in `main.tf` with `var.vpc_id`*
+
+<details>
+    <summary>Main.tf using variable.tf for soft-coding</summary>
 
 ```
 ## Let's set up our cloud provider with Terraform
@@ -188,6 +192,7 @@ resource "aws_instance" "app_instance" {
     }
 }
 ```
+
 ---
 ### Using output values as inputs in `main.tf`
 In the previous section, `main.tf` needs to be run multiple times. Each time the script is run, we need to go to AWS and get the ID of what was just created, and put that into the `variable.tf`. This is because a new ID is assigned to the object that each time it is created. We can change `main.tf` such that it extracts the ID from the object that is created and then uses it in the next section. The script for this is:
