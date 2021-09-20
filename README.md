@@ -393,6 +393,25 @@ This is the error:
 
 ![](./img/aws_ASG_using_launch_template_error.PNG)
 
+Additionally, when defining subnets for the subnets for the Auto Scaling group (using `vpc_zone_identifier`), the subnets must be on different availability zones. A subnet can be created on a specified availability zone:
+
+```
+resource "aws_subnet" "sre_will_private_subnet_tf" {
+    vpc_id = aws_vpc.sre_will_vpc_tf.id
+    cidr_block = var.private_subnet_CIDR_block
+    map_public_ip_on_launch = true
+
+    ###
+    availability_zone_id = "euw1-az2" # Needed for load-balancing task
+    # Requires at least 2 subnets on different availability zones
+    ###
+
+    tags = {
+        Name = "sre_will_private_subnet_tf"
+    }
+}
+```
+
 <details>
     <summary>Main.tf script for creating an application Load-Balancer and an Auto Scaling group >> (Click to expand)</summary>
 
